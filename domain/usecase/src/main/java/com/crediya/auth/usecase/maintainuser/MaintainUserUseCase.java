@@ -1,41 +1,48 @@
 package com.crediya.auth.usecase.maintainuser;
 
-import com.crediya.auth.model.usuario.Usuario;
-import com.crediya.auth.model.usuario.gateways.UsuarioRepository;
+import com.crediya.auth.model.usuario.User;
+import com.crediya.auth.model.usuario.gateways.UserRepository;
+import com.crediya.auth.usecase.exception.DuplicateEmailException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class MaintainUserUseCase {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UserRepository userRepository;
 
-    public Mono<Usuario> create(Usuario usuario) {
-        return Mono.defer(() -> validateUser(usuario))
+    private static final double MAX_BASE_SALARY = 15_000_000;
+    private static final double MIN_BASE_SALARY = 0;
+
+    public Mono<User> create(User user) {
+        return Mono.defer(() -> validateUser(user))
                 .flatMap(validUser ->
-                        usuarioRepository.existsByEmail(validUser.getEmail())
-                                .flatMap(exists -> exists
-                                        ? Mono.error(new IllegalArgumentException("Email already exists"))
-                                        : usuarioRepository.save(validUser)
+                        userRepository.existsByEmail(validUser.getEmail())
+                                .flatMap(exists -> Boolean.TRUE.equals(exists)
+                                        ? Mono.error(new DuplicateEmailException(validUser.getEmail()))
+                                        : userRepository.save(validUser)
                                 )
                 );
     }
 
-    private Mono<Usuario> validateUser(Usuario usuario) {
-        if (usuario.getName() == null || usuario.getName().isEmpty()) {
-            return Mono.error(new IllegalArgumentException("Name is required"));
+    private Mono<User> validateUser(User user) {
+        if (user.getName() == null || user.getName().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("name is required"));
         }
-        if (usuario.getLastName() == null || usuario.getLastName().isEmpty()) {
-            return Mono.error(new IllegalArgumentException("Last name is required"));
+        if (user.getLastName() == null || user.getLastName().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("lastName is required"));
         }
-        if (usuario.getEmail() == null || usuario.getEmail().isEmpty()) {
-            return Mono.error(new IllegalArgumentException("Email is required"));
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("email is required"));
         }
-        if (usuario.getBaseSalary() == null
-                || usuario.getBaseSalary().doubleValue() <= 0
-                || usuario.getBaseSalary().doubleValue() >= 15_000_000) {
-            return Mono.error(new IllegalArgumentException("Base salary must be greater than zero and less than 15,000,000"));
+        if(!user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            return Mono.error(new IllegalArgumentException("email format is invalid"));
         }
-        return Mono.just(usuario);
+        if (user.getBaseSalary() == null
+                || user.getBaseSalary().doubleValue() <= MIN_BASE_SALARY
+                || user.getBaseSalary().doubleValue() >= MAX_BASE_SALARY) {
+            return Mono.error(new IllegalArgumentException("baseSalary must be greater than zero and less than 15,000,000"));
+        }
+        return Mono.just(user);
     }
 }

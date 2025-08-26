@@ -4,6 +4,7 @@ import com.crediya.auth.usecase.exception.DuplicateEmailException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
 
@@ -19,7 +20,7 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.Map;
 
-
+@Slf4j
 @Component
 @Order(-2)
 public class GlobalErrorHandler implements ErrorWebExceptionHandler {
@@ -29,6 +30,22 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         HttpStatus status = resolveStatus(ex);
+
+        if (status.is4xxClientError()) {
+            // Errores esperables del cliente: WARN sin stacktrace
+            log.warn("{} {} -> {} {} : {}",
+                    exchange.getRequest().getMethod(),
+                    exchange.getRequest().getPath(),
+                    status.value(), status.getReasonPhrase(),
+                    readableReason(ex));
+        } else {
+            // Errores de servidor: ERROR con stacktrace
+            log.error("{} {} -> {} {} : {}",
+                    exchange.getRequest().getMethod(),
+                    exchange.getRequest().getPath(),
+                    status.value(), status.getReasonPhrase(),
+                    ex.getMessage(), ex);
+        }
 
         Map<String,Object> body = Map.of(
                 "timestamp", Instant.now().toString(),
@@ -72,5 +89,10 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         if(ex instanceof ResponseStatusException rse) return rse.getReason();
 
         return ex.getMessage();
+    }
+
+    private String readableReason(Throwable t) {
+        if (t instanceof ResponseStatusException rse) return rse.getReason();
+        return t.getMessage();
     }
 }

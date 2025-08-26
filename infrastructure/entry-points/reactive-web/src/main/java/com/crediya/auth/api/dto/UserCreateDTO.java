@@ -19,5 +19,4 @@ public record UserCreateDTO(
         @NotNull (message = "baseSalary is required")
         @DecimalMin(value = "0.01", message = "baseSalary must be greater than zero and less than 15,000,000")
         @DecimalMax(value = "15000000", message = "baseSalary must be greater than zero and less than 15,000,000")
-        BigDecimal baseSalary) {
-}
+        BigDecimal baseSalary) { }

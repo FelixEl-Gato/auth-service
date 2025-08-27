@@ -179,9 +179,9 @@ class MaintainUserUseCaseTest {
     }
 
     @Test
-    @DisplayName("baseSalary zero")
+    @DisplayName("baseSalary < zero")
     void baseSalary_zero() {
-        User input = withSalary(validUser(), BigDecimal.ZERO);
+        User input = withSalary(validUser(), BigDecimal.valueOf(-1));
 
         StepVerifier.create(useCase.create(input))
                 .expectErrorSatisfies( ex -> {
@@ -194,9 +194,9 @@ class MaintainUserUseCaseTest {
     }
 
     @Test
-    @DisplayName("baseSalary >= 15000000")
+    @DisplayName("baseSalary > 15000000")
     void salary_greaterOrEqualMax(){
-        User input = withSalary(validUser(), new BigDecimal("15000000"));
+        User input = withSalary(validUser(), new BigDecimal("15000001"));
 
         StepVerifier.create(useCase.create(input))
                 .expectErrorSatisfies( ex -> {

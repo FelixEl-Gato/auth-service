@@ -41,9 +41,9 @@ public class MaintainUserUseCase {
             return Mono.error(new IllegalArgumentException("email format is invalid"));
         }
         if (user.getBaseSalary() == null
-                || user.getBaseSalary().compareTo(MIN_BASE_SALARY) <= 0
-                ||  user.getBaseSalary().compareTo(MAX_BASE_SALARY) >= 0) {
-            return Mono.error(new IllegalArgumentException("baseSalary must be greater than " + MIN_BASE_SALARY + " and less than " + MAX_BASE_SALARY));
+                || user.getBaseSalary().compareTo(MIN_BASE_SALARY) < 0
+                ||  user.getBaseSalary().compareTo(MAX_BASE_SALARY) > 0) {
+            return Mono.error(new IllegalArgumentException("baseSalary must be greater than or equal to " + MIN_BASE_SALARY + " and less than or equal to" + MAX_BASE_SALARY));
         }
         return Mono.just(user);
     }

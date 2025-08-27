@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RequestValidator {
 
-    private final SmartValidator validator; // viene de spring-boot-starter-validation
+    private final SmartValidator validator;
 
     public <T> Mono<T> validate(T target, Class<?>... groups) {
         var errors = new BeanPropertyBindingResult(target, target.getClass().getSimpleName());

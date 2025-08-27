@@ -37,7 +37,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
                     exchange.getRequest().getMethod(),
                     exchange.getRequest().getPath(),
                     status.value(), status.getReasonPhrase(),
-                    readableReason(ex));
+                    userMessage(ex));
         } else {
             // Errores de servidor: ERROR con stacktrace
             log.error("{} {} -> {} {} : {}",
@@ -75,7 +75,6 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         if (ex instanceof ConstraintViolationException) return HttpStatus.BAD_REQUEST;
         if (ex instanceof org.springframework.web.server.ServerWebInputException) return HttpStatus.BAD_REQUEST;
 
-        // Permite usar ResponseStatusException donde te convenga
         if (ex instanceof ResponseStatusException rse) return HttpStatus.valueOf(rse.getStatusCode().value());
 
         return HttpStatus.INTERNAL_SERVER_ERROR;
@@ -89,10 +88,5 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         if(ex instanceof ResponseStatusException rse) return rse.getReason();
 
         return ex.getMessage();
-    }
-
-    private String readableReason(Throwable t) {
-        if (t instanceof ResponseStatusException rse) return rse.getReason();
-        return t.getMessage();
     }
 }

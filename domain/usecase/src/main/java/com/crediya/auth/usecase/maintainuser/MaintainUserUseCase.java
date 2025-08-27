@@ -1,7 +1,6 @@
 package com.crediya.auth.usecase.maintainuser;
 
 import com.crediya.auth.model.usuario.User;
-import com.crediya.auth.model.usuario.gateways.TransactionPort;
 import com.crediya.auth.model.usuario.gateways.UserRepository;
 import com.crediya.auth.usecase.exception.DuplicateEmailException;
 import lombok.RequiredArgsConstructor;

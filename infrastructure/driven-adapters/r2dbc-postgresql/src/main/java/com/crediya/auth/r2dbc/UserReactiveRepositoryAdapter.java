@@ -25,11 +25,7 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
 
     @Override
     public Mono<User> saveUserTransactional(User user) {
-        UserEntity entity = mapper.map(user, UserEntity.class);
-        return transactionalOperator.execute(tx ->
-                repository.save(entity)
-                        .map(savedEntity -> mapper.map(savedEntity, User.class))
-        ).single();
+        return this.save(user).as(transactionalOperator::transactional);
     }
 
     @Override

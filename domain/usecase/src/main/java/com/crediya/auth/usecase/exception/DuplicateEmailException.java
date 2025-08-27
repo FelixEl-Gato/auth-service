@@ -10,8 +10,4 @@ public class DuplicateEmailException extends RuntimeException{
         super("email already exists: " + email);
         this.email = email;
     }
-
-    public String getEmail() {
-        return email;
-    }
 }

@@ -1,14 +1,33 @@
-##Spring Configuration
 server:
   port: 8080
 spring:
   application:
-    name: auth-service
+    name: "auth-service"
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: /h2
+#  h2:
+#    console:
+#      enabled: true
+#      path: "/h2"
   profiles:
-    include:
+    include: null
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+adapters:
+  r2dbc:
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5433}
+    database: ${DB_NAME:crediya}
+    schema: ${DB_SCHEMA:public}
+    username: ${DB_USER:crediya}
+    password: ${DB_PASSWORD:crediya2025}

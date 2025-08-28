@@ -26,7 +26,7 @@ public class UserRouterRest {
     @Bean
     @RouterOperations({
             @RouterOperation(
-                    path = "/api/v1/user/create",
+                    path = "/api/v1/users/create",
                     produces = MediaType.APPLICATION_JSON_VALUE,
                     method = RequestMethod.POST,
                     beanClass = UserHandler.class,
@@ -46,6 +46,6 @@ public class UserRouterRest {
             )
     })
     public RouterFunction<ServerResponse> routerFunction(UserHandler userHandler) {
-        return route(POST("/api/v1/user/create"), userHandler::listenCreateUser);
+        return route(POST("/api/v1/users/create"), userHandler::listenCreateUser);
     }
 }

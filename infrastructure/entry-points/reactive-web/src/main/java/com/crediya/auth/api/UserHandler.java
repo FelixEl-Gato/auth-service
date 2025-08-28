@@ -28,7 +28,7 @@ public class UserHandler {
         log.info("POST /api/v1/usuarios - request received");
 
         return serverRequest.bodyToMono(UserCreateDTO.class)
-                .flatMap(userCreateDTO -> requestValidator.validate(userCreateDTO))
+                .flatMap(requestValidator::validate)
                 .map(userDTOMapper::toModel)
                 .flatMap(maintainUserUseCase::create)
                 .map(userDTOMapper::toResponse)

@@ -15,15 +15,15 @@ public class MaintainUserUseCase {
 
     private static final BigDecimal  MAX_BASE_SALARY = new BigDecimal("15000000");
     private static final BigDecimal  MIN_BASE_SALARY = BigDecimal.ZERO;
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
 
     public Mono<User> create(User user) {
         return Mono.defer(() -> validateUser(user))
                 .flatMap(validUser ->
                         userRepository.existsByEmail(validUser.getEmail())
-                                .flatMap(exists -> Boolean.TRUE.equals(exists)
-                                        ? Mono.error(new DuplicateEmailException(validUser.getEmail()))
-                                        : userRepository.saveUserTransactional(validUser)
-                                )
+                                .filter(exits-> !exits)
+                                .switchIfEmpty(Mono.error(new DuplicateEmailException(validUser.getEmail())))
+                                .then(userRepository.saveUserTransactional(validUser))
                 );
     }
 
@@ -37,12 +37,12 @@ public class MaintainUserUseCase {
         if (user.getEmail() == null || user.getEmail().isEmpty()) {
             return Mono.error(new IllegalArgumentException("email is required"));
         }
-        if(!user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if(!user.getEmail().matches(EMAIL_REGEX)) {
             return Mono.error(new IllegalArgumentException("email format is invalid"));
         }
         if (user.getBaseSalary() == null
                 || user.getBaseSalary().compareTo(MIN_BASE_SALARY) < 0
-                ||  user.getBaseSalary().compareTo(MAX_BASE_SALARY) > 0) {
+                || user.getBaseSalary().compareTo(MAX_BASE_SALARY) > 0) {
             return Mono.error(new IllegalArgumentException("baseSalary must be greater than or equal to " + MIN_BASE_SALARY + " and less than or equal to" + MAX_BASE_SALARY));
         }
         return Mono.just(user);

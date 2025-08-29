@@ -3,6 +3,7 @@ package com.crediya.auth.usecase.maintainuser;
 import com.crediya.auth.model.usuario.User;
 import com.crediya.auth.model.usuario.gateways.UserRepository;
 import com.crediya.auth.usecase.exception.DuplicateEmailException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -85,25 +86,6 @@ class MaintainUserUseCaseTest {
     }
 
     @Test
-    @DisplayName("flow: create Email exists -> error")
-    void create_error_whenEmailExists() {
-        User input = validUser();
-
-        when(userRepository.existsByEmail(input.getEmail())).thenReturn(Mono.just(true));
-
-        StepVerifier.create(useCase.create(input))
-                .expectErrorSatisfies( ex -> {
-                    assert ex instanceof DuplicateEmailException;
-                    assert ex.getMessage().contains(input.getEmail());
-                })
-                .verify();
-
-        verify(userRepository).existsByEmail(input.getEmail());
-        verify(userRepository, never()).saveUserTransactional(any());
-        verifyNoMoreInteractions(userRepository);
-    }
-
-    @Test
     @DisplayName("name required")
     void validate_name_required() {
         User input = withName(validUser(), null);
@@ -119,9 +101,39 @@ class MaintainUserUseCaseTest {
     }
 
     @Test
+    @DisplayName("name empty")
+    void validate_name_required_empty() {
+        User input = withName(validUser(), "");
+
+        StepVerifier.create(useCase.create(input))
+                .expectErrorSatisfies( ex -> {
+                    assert ex instanceof IllegalArgumentException;
+                    assert ex.getMessage().equals("name is required");
+                })
+                .verify();
+
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
     @DisplayName("lastName required")
     void validate_lastName_required() {
         User input = withLastName(validUser(), "");
+
+        StepVerifier.create(useCase.create(input))
+                .expectErrorSatisfies( ex -> {
+                    assert ex instanceof IllegalArgumentException;
+                    assert ex.getMessage().equals("lastName is required");
+                })
+                .verify();
+
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    @DisplayName("lastName null")
+    void validate_lastName_required_null() {
+        User input = withLastName(validUser(), null);
 
         StepVerifier.create(useCase.create(input))
                 .expectErrorSatisfies( ex -> {

@@ -53,7 +53,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         ErrorResponseDTO payload = new ErrorResponseDTO(
                 Instant.now().toString(),
                 status.value(),
-                status.getReasonPhrase(),
+                status.getReasonPhrase().toUpperCase(),
                 userMessage(throwable)
         );
 
@@ -75,10 +75,8 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
 
         // 400 por errores de entrada/validación
         if (ex instanceof IllegalArgumentException) return HttpStatus.BAD_REQUEST;
-        if (ex instanceof ConstraintViolationException) return HttpStatus.BAD_REQUEST;
         if (ex instanceof ServerWebInputException) return HttpStatus.BAD_REQUEST;
-
-        if (ex instanceof ResponseStatusException rse) return HttpStatus.valueOf(rse.getStatusCode().value());
+        if (ex instanceof ResponseStatusException rse) return (HttpStatus) rse.getStatusCode();
 
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }

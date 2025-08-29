@@ -28,6 +28,7 @@ public class UserHandler {
         log.info("POST /api/v1/usuarios - request received");
 
         return serverRequest.bodyToMono(UserCreateDTO.class)
+                .switchIfEmpty(Mono.error(new ServerWebInputException("Request body is required")))
                 .flatMap(requestValidator::validate)
                 .map(userDTOMapper::toModel)
                 .flatMap(maintainUserUseCase::create)
@@ -35,7 +36,6 @@ public class UserHandler {
                 .flatMap(createdUser -> {
                     log.info("POST /api/v1/usuarios - created in {} ms", System.currentTimeMillis() - started);
                     return ServerResponse.ok().bodyValue(createdUser);
-                })
-                .switchIfEmpty(Mono.error(new ServerWebInputException("Request body is required")));
+                });
     }
 }
